@@ -20,28 +20,28 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-interface OrderDetailsProps {
+import { OrderDetailsSkeleton } from './order-details-skeleton'
+
+export interface OrderDetailsProps {
   orderId: string
-  isOpen: boolean
+  open: boolean
 }
 
-export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
+export function OrderDetails({ orderId, open }: OrderDetailsProps) {
   const { data: order } = useQuery({
     queryKey: ['order', orderId],
     queryFn: () => getOrderDetails({ orderId }),
-    enabled: isOpen,
+    enabled: open,
   })
-
-  console.log('oi')
 
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Pedido: {orderId}</DialogTitle>
-        <DialogDescription></DialogDescription>
+        <DialogDescription>Detalhes do pedido</DialogDescription>
       </DialogHeader>
 
-      {order && (
+      {order ? (
         <div className="space-y-6">
           <Table>
             <TableBody>
@@ -51,14 +51,12 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
                   <OrderStatus status={order.status} />
                 </TableCell>
               </TableRow>
-
               <TableRow>
                 <TableCell className="text-muted-foreground">Cliente</TableCell>
                 <TableCell className="flex justify-end">
                   {order.customer.name}
                 </TableCell>
               </TableRow>
-
               <TableRow>
                 <TableCell className="text-muted-foreground">
                   Telefone
@@ -67,21 +65,18 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
                   {order.customer.phone ?? 'Não informado'}
                 </TableCell>
               </TableRow>
-
               <TableRow>
                 <TableCell className="text-muted-foreground">E-mail</TableCell>
                 <TableCell className="flex justify-end">
                   {order.customer.email}
                 </TableCell>
               </TableRow>
-
               <TableRow>
                 <TableCell className="text-muted-foreground">
                   Realizado há
                 </TableCell>
                 <TableCell className="flex justify-end">
-                  {' '}
-                  {formatDistanceToNow(order.createdAt!, {
+                  {formatDistanceToNow(order.createdAt, {
                     locale: ptBR,
                     addSuffix: true,
                   })}
@@ -100,24 +95,24 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {order.orderItems.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell>{order.product.name}</TableCell>
-                  <TableCell className="text-right">{order.quantity}</TableCell>
+              {order.orderItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.product.name}</TableCell>
+                  <TableCell className="text-right">{item.quantity}</TableCell>
                   <TableCell className="text-right">
-                    {(order.priceInCents / 100).toLocaleString('pt-BR', {
+                    {(item.priceInCents / 100).toLocaleString('pt-BR', {
                       style: 'currency',
                       currency: 'BRL',
                     })}
                   </TableCell>
                   <TableCell className="text-right">
-                    {(
-                      (order.priceInCents * order.quantity) /
-                      100
-                    ).toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    })}
+                    {((item.priceInCents * item.quantity) / 100).toLocaleString(
+                      'pt-BR',
+                      {
+                        style: 'currency',
+                        currency: 'BRL',
+                      },
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -135,6 +130,8 @@ export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
             </TableFooter>
           </Table>
         </div>
+      ) : (
+        <OrderDetailsSkeleton />
       )}
     </DialogContent>
   )
