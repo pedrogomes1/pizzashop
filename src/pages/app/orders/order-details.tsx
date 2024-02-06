@@ -24,14 +24,14 @@ import { OrderDetailsSkeleton } from './order-details-skeleton'
 
 export interface OrderDetailsProps {
   orderId: string
-  open: boolean
+  isOpen: boolean
 }
 
-export function OrderDetails({ orderId, open }: OrderDetailsProps) {
+export function OrderDetails({ orderId, isOpen }: OrderDetailsProps) {
   const { data: order } = useQuery({
     queryKey: ['order', orderId],
     queryFn: () => getOrderDetails({ orderId }),
-    enabled: open,
+    enabled: isOpen,
   })
 
   return (
@@ -76,7 +76,7 @@ export function OrderDetails({ orderId, open }: OrderDetailsProps) {
                   Realizado há
                 </TableCell>
                 <TableCell className="flex justify-end">
-                  {formatDistanceToNow(order.createdAt, {
+                  {formatDistanceToNow(order.createdAt!, {
                     locale: ptBR,
                     addSuffix: true,
                   })}
